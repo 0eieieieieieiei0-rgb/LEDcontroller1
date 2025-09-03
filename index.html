@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8" />
-  <title>ESP32 Relay Control Dashboard</title>
+  <title>ESP32 LED Control Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     body {
@@ -20,7 +20,7 @@
       margin-top: 30px;
       font-size: 1.8rem;
     }
-    .relay-card {
+    .led-card {
       display: inline-block;
       background-color: white;
       padding: 20px;
@@ -30,15 +30,15 @@
       width: 220px;
       vertical-align: top;
     }
-    .relay-card h2 {
+    .led-card h2 {
       margin-bottom: 10px;
       font-size: 1.3rem;
     }
-    .relay-card p {
+    .led-card p {
       margin-bottom: 10px;
       font-size: 1rem;
     }
-    .relay-card button {
+    .led-card button {
       padding: 10px 20px;
       border: none;
       border-radius: 10px;
@@ -46,10 +46,10 @@
       background-color: blue;
       cursor: pointer;
       font-size: 16px;
-	  width: 90%;
+      width: 90%;
       transition: opacity 0.3s ease;
     }
-    .relay-card button:hover {
+    .led-card button:hover {
       opacity: 0.8;
     }
     #allOffBtn, #logoutBtn {
@@ -77,8 +77,6 @@
     #logoutBtn:hover {
       opacity: 0.8;
     }
-
-    /* Responsive layout */
     #dashboard {
       display: none;
     }
@@ -118,16 +116,15 @@
     #loginForm button:hover {
       background-color: #1565c0;
     }
-    #dashboard .relay-container {
+    #dashboard .led-container {
       max-width: 960px;
       margin: 20px auto 0;
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
     }
-    /* Smaller devices */
     @media (max-width: 700px) {
-      .relay-card {
+      .led-card {
         width: 90%;
         margin: 10px auto;
         display: block;
@@ -146,7 +143,7 @@
 </head>
 <body>
 
-  <h1>ESP32 Relay Control Dashboard</h1>
+  <h1>ESP32 LED Control Dashboard</h1>
 
   <!-- Login form -->
   <div id="loginForm">
@@ -157,26 +154,26 @@
 
   <!-- Dashboard -->
   <div id="dashboard">
-    <div class="relay-container">
-      <div class="relay-card">
+    <div class="led-container">
+      <div class="led-card">
         <h2>LED 1</h2>
         <p>Status: <span id="status1">Loading...</span></p>
         <button id="btn1">Toggle</button>
       </div>
 
-      <div class="relay-card">
+      <div class="led-card">
         <h2>LED 2</h2>
         <p>Status: <span id="status2">Loading...</span></p>
         <button id="btn2">Toggle</button>
       </div>
 
-      <div class="relay-card">
+      <div class="led-card">
         <h2>LED 3</h2>
         <p>Status: <span id="status3">Loading...</span></p>
         <button id="btn3">Toggle</button>
       </div>
 
-      <div class="relay-card">
+      <div class="led-card">
         <h2>LED 4</h2>
         <p>Status: <span id="status4">Loading...</span></p>
         <button id="btn4">Toggle</button>
@@ -198,18 +195,17 @@
 
   <script>
     const firebaseConfig = {
-  apiKey: "AIzaSyANR9mj38HQCbEH3UpmKQg9JL6G1wmDi60",
-  authDomain: "niggle888-ccf83.firebaseapp.com",
-  databaseURL: "https://niggle888-ccf83-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "niggle888-ccf83",
-  storageBucket: "niggle888-ccf83.firebasestorage.app",
-  messagingSenderId: "87682718223",
-  appId: "1:87682718223:web:5d3a0ec7ee5b06810de17a"
-};
+      apiKey: "AIzaSyANR9mj38HQCbEH3UpmKQg9JL6G1wmDi60",
+      authDomain: "niggle888-ccf83.firebaseapp.com",
+      databaseURL: "https://niggle888-ccf83-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "niggle888-ccf83",
+      storageBucket: "niggle888-ccf83.firebasestorage.app",
+      messagingSenderId: "87682718223",
+      appId: "1:87682718223:web:5d3a0ec7ee5b06810de17a"
+    };
 
     firebase.initializeApp(firebaseConfig);
 
-    // Predefined login credentials (can be replaced with your logic)
     const allowedEmail = "csayphibully@gmail.com";
     const allowedPassword = "1234567890";
 
@@ -226,15 +222,13 @@
         return;
       }
 
-      // Check hardcoded credentials first
       if(email === allowedEmail && password === allowedPassword){
-        // Sign in with Firebase
         firebase.auth().signInWithEmailAndPassword(email, password)
           .then(userCredential => {
             console.log("Signed in as", userCredential.user.email);
             loginForm.style.display = "none";
             dashboard.style.display = "block";
-            startRelayControl();
+            startLedControl();
           })
           .catch(error => {
             alert("Firebase login failed: " + error.message);
@@ -244,37 +238,37 @@
       }
     });
 
-    function startRelayControl() {
+    function startLedControl() {
       const db = firebase.database();
 
-      const relays = [
-        { id: 1, path: "LED1" },
-        { id: 2, path: "LED2" },
-        { id: 3, path: "LED3" },
-        { id: 4, path: "LED4" },
+      const leds = [
+        { id: 1, path: "led1" },
+        { id: 2, path: "led2" },
+        { id: 3, path: "led3" },
+        { id: 4, path: "led4" },
       ];
 
-      relays.forEach(relay => {
-        const statusText = document.getElementById(`status${relay.id}`);
-        const toggleButton = document.getElementById(`btn${relay.id}`);
-        const relayRef = db.ref("/" + relay.path);
+      leds.forEach(led => {
+        const statusText = document.getElementById(`status${led.id}`);
+        const toggleButton = document.getElementById(`btn${led.id}`);
+        const ledRef = db.ref("/" + led.path);
 
-        relayRef.on("value", (snapshot) => {
+        ledRef.on("value", (snapshot) => {
           const state = snapshot.val();
           statusText.innerText = state ? "ON" : "OFF";
           toggleButton.style.backgroundColor = state ? "green" : "blue";
         });
 
         toggleButton.onclick = () => {
-          relayRef.get().then(snap => {
-            relayRef.set(!snap.val());
+          ledRef.get().then(snap => {
+            ledRef.set(!snap.val());
           });
         };
       });
 
       document.getElementById("allOffBtn").onclick = () => {
-        relays.forEach(relay => {
-          db.ref("/" + relay.path).set(false);
+        leds.forEach(led => {
+          db.ref("/" + led.path).set(false);
         });
       };
     }
@@ -293,5 +287,4 @@
     };
   </script>
 </body>
-
 </html>
